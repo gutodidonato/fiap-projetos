@@ -1,163 +1,97 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Switch } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 
-interface Task {
-  key: string;
-  text: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  isEnabled: boolean;
-}
 
-interface TaskItemProps {
-  text: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  isEnabled: boolean;
-  toggleSwitch: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}
-
-const TaskItem: React.FC<TaskItemProps> = ({ text, icon, isEnabled, toggleSwitch, onEdit, onDelete }) => {
+const Tarefas = ({ item }) => {
   return (
-    <TouchableOpacity onPress={toggleSwitch}>
-      <View style={styles.taskItem}>
-        <Ionicons name={icon} size={24} color="black" />
-        <Text style={[styles.taskText, { textDecorationLine: isEnabled ? 'line-through' : 'none' }]}>{text}</Text>
-        <TouchableOpacity onPress={onEdit} style={{ marginRight: 12 }}>
-          <Ionicons name="pencil-outline" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={onDelete}>
-          <Ionicons name="trash-outline" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
+    <View style={{ marginBottom: 10, backgroundColor: 'white', padding: 10, borderRadius: 10 }}>
+      <Text>{item}</Text>
+    </View>
   );
-};
+}
 
-const App: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [task, setTask] = useState<string>('');
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const toggleSwitch = (index: number) => {
-    const newTasks = [...tasks];
-    newTasks[index].isEnabled = !newTasks[index].isEnabled;
-    setTasks(newTasks);
-  }
+const App = () => {
 
-  const addTask = () => {
-    if (editingTask) {
-      const newTasks = [...tasks];
-      newTasks[editingTask.index] = { ...editingTask, text: task };
-      setTasks(newTasks);
-      setEditingTask(null);
-    } else {
-      const newTask = { key: (tasks.length + 1).toString(), text: task, icon: 'checkmark-done-outline', isEnabled: false };
-      setTasks([...tasks, newTask]);
+  const [tarefas, setTarefas] = React.useState([]);
+  const [tarefa, setTarefa] = React.useState('');
+
+  function adicionarTarefa() {
+
+    if (tarefa === '') {
+      return alert('Digite uma tarefa');
     }
-    setTask('');
+
+    setTarefas([...tarefas, tarefa]);
+    setTarefa('');
   }
 
-  const deleteTask = (index: number) => {
-    const newTasks = [...tasks];
-    newTasks.splice(index, 1);
-    setTasks(newTasks);
-  }
-
-  const editTask = (index: number) => {
-    setTask(tasks[index].text);
-    setEditingTask({ ...tasks[index], index });
-  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Todo List</Text>
+      <Text style={styles.title}>Tarefas do dia</Text>
+
       <FlatList
-        data={tasks}
-        renderItem={({ item, index }) => (
-          <TaskItem
-            text={item.text}
-            icon={item.icon}
-            isEnabled={item.isEnabled}
-            toggleSwitch={() => toggleSwitch(index)}
-            onEdit={() => editTask(index)}
-            onDelete={() => deleteTask(index)}
-          />
+        data={tarefas}
+        renderItem={({ item }) => (
+          <Tarefas item={item} />
         )}
+        keyExtractor={(item, index) => index.toString()}
       />
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Add a new task"
-          value={task}
-          onChangeText={setTask}
+          placeholder="Digite uma tarefa"
+          value={tarefa}
+          onChangeText={(texto) => setTarefa(texto)}
         />
-        <TouchableOpacity style={styles.addButton} onPress={addTask}>
-          <Ionicons name="add" size={24} color="black" />
+        <TouchableOpacity onPress={() => adicionarTarefa()} style={styles.addBtn}>
+          <Ionicons name="add" size={30} color="#C0C0C0" />
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#f0f0f0',
-    marginTop: 24,
+    padding: 20,
+    paddingTop: 90
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  taskItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  taskText: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 18,
-  },
-  toggleSwitch: {
-    width: 50,
-    height: 25,
-    borderRadius: 25,
-    backgroundColor: '#ccc',
+    marginBottom: 20
   },
   inputContainer: {
+    marginBottom: 20,
     flexDirection: 'row',
-    marginTop: 20,
+    justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 30
   },
   input: {
-    flex: 1,
+    height: 40,
+    borderRadius: 15,
+    borderColor: 'gray',
+    paddingHorizontal: 10,
     backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    fontSize: 18,
+    width: '100%'
   },
-  addButton: {
+  addBtn: {
     marginLeft: 10,
-    backgroundColor: 'white',
+    marginTop: 4,
     borderRadius: 50,
-    padding: 10,
-  },
+    padding: 5,
+    backgroundColor: 'white',
+  }
 });
+
 
 export default App; 
