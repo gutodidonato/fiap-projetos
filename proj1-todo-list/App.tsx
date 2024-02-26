@@ -1,13 +1,22 @@
 import React from 'react';
 import { View, StyleSheet, Text, FlatList, TouchableOpacity, TextInput } from 'react-native';
-
+import { PaperProvider, Modal, Portal, Button } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { Tarefas } from './Tarefas';
 
 const App = () => {
+  /*SET do modal */
+    const [visible, setVisible] = React.useState(false);
+  
+    const showModal = () => setVisible(true);
+    const hideModal = () => setVisible(false);
+    const containerStyle = {backgroundColor: 'white', padding: 20};
+  
 
   const [tarefas, setTarefas] = React.useState([]);
   const [tarefa, setTarefa] = React.useState(null);
+  const [text, setText] = React.useState("");
+
 
   function adicionarTarefa() {
 
@@ -25,35 +34,35 @@ const App = () => {
   }
 
   function deletarTarefa(indice) {
-    // copia do array
     const copiaTarefas = [...tarefas];
-
-    // atualizar item
     const arrayAtualizado = copiaTarefas.filter((_, index) => index !== indice);
-
-    // atualizar estado
     setTarefas(arrayAtualizado);
   }
 
   function marcarTarefa(indice) {
-    // copia do array
     const copiaTarefas = [...tarefas];
-
-    // atualizar item
     copiaTarefas[indice].isConcluido = !copiaTarefas[indice].isConcluido;
-
-    // atualizar estado
     setTarefas(copiaTarefas);
   }
 
+  function editarTarefa(indice){
+    showModal()
+    const tarefaAtual = tarefas[indice]
+    console.log(tarefaAtual.tarefa)
+    setText(tarefaAtual.tarefa)
+
+  }
   return (
+    <PaperProvider>
     <View style={styles.container}>
       <Text style={styles.title}>Tarefas do dia</Text>
 
       <FlatList
         data={tarefas}
         renderItem={({ item, index }) => (
-          <Tarefas item={item} indice={index} delTarefa={deletarTarefa} marcarTarefa={marcarTarefa} />
+          <View>
+          <Tarefas item={item} indice={index} delTarefa={deletarTarefa} editarTarefa={editarTarefa} marcarTarefa={marcarTarefa} />
+          </View>
         )}
         keyExtractor={(item, index) => index.toString()}
       />
@@ -70,6 +79,17 @@ const App = () => {
         </TouchableOpacity>
       </View>
     </View>
+    <Portal>
+        <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={containerStyle}>
+        <TextInput 
+            /*PRECISO PEGAR A TAREFA E PASSAR PRA CA PORRA, NO DISMISS QUERO TROCAR A TAREFA */
+            label={tarefa}
+            value={tarefa}
+            onChangeText={text => setText(text)}
+        />
+        </Modal>
+      </Portal>
+    </PaperProvider>
   );
 };
 
